@@ -15,7 +15,7 @@ pipeline {
         docker run --rm ^
           -v %cd%:/app ^
           -w /app/java-maven-sonar-argocd-helm-k8s/spring-boot-app ^
-          abhishekf5/maven-abhishek-docker-agent:v1 mvn clean package
+          maven:3.9.9-eclipse-temurin-17 mvn clean package
         """
       }
     }
@@ -30,7 +30,7 @@ pipeline {
           docker run --rm ^
             -v %cd%:/app ^
             -w /app/java-maven-sonar-argocd-helm-k8s/spring-boot-app ^
-            abhishekf5/maven-abhishek-docker-agent:v1 mvn sonar:sonar -Dsonar.login=%SONAR_AUTH_TOKEN% -Dsonar.host.url=${SONAR_URL}
+            maven:3.9.9-eclipse-temurin-17 mvn sonar:sonar -Dsonar.login=%SONAR_AUTH_TOKEN% -Dsonar.host.url=${SONAR_URL}
           """
         }
       }
