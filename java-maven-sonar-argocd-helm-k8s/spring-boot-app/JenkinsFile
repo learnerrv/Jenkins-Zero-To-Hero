@@ -60,7 +60,7 @@ pipeline {
 }
 
 
-  stage('Update Deployment File') {
+ stage('Update Deployment File') {
   environment {
     GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
     GIT_USER_NAME = "learnerrv"
@@ -71,22 +71,22 @@ pipeline {
         // Construct push URL with token
         def pushUrl = "https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}"
 
-        // Run the commands
-        bat """
+        // Use single-quoted Groovy string for bat to avoid interpolation conflicts
+        bat '''
         git config user.email "rupal.xyz@gmail.com"
         git config user.name "Rupal"
 
-        REM Update the deployment image tag in the YAML
-        powershell -Command "(Get-Content java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml) -replace '\\\\d+$','${BUILD_NUMBER}' | Set-Content java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
+        powershell -Command "(Get-Content java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml) -replace '\\d+$','''' + BUILD_NUMBER + '''' | Set-Content java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
 
         git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-        git commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "No changes to commit"
-        git push ${pushUrl} HEAD:main
-        """
+        git commit -m "Update deployment image to version ''' + BUILD_NUMBER + '''" || echo No changes to commit
+        git push ''' + pushUrl + ''' HEAD:main
+        '''
       }
     }
   }
 }
+
 
 
   }
