@@ -37,22 +37,28 @@ pipeline {
     }
 
     stage('Build and Push Docker Image') {
-      environment {
-        DOCKER_IMAGE = "abhishekf5/ultimate-cicd:${BUILD_NUMBER}"
-        REGISTRY_CREDENTIALS = credentials('docker-cred')
-      }
-      steps {
-        script {
-          bat """
-          cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
-          docker build -t ${DOCKER_IMAGE} .
-          """
-          docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
-            docker.image("${DOCKER_IMAGE}").push()
-          }
-        }
+  environment {
+    DOCKER_IMAGE = "abhishekf5/ultimate-cicd:${BUILD_NUMBER}"
+  }
+  steps {
+    withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+      script {
+        bat """
+        echo Logging in to Docker Hub...
+        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+
+        echo Building Docker image...
+        cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
+        docker build -t ${DOCKER_IMAGE} .
+
+        echo Pushing Docker image...
+        docker push ${DOCKER_IMAGE}
+        """
       }
     }
+  }
+}
+
 
     stage('Update Deployment File') {
       environment {
